@@ -1,0 +1,3 @@
+rootProject.name='AppServiceManager'
+include ':app'
+include ':lib'
