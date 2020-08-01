@@ -23,6 +23,8 @@ public class ServiceManager {
   private static IServiceManager sIServiceManager;
 
   private static void ensureIServiceManager(final Context context) {
+    if (sIServiceManager != null) { return; }
+
     Bundle bundle = context.getContentResolver().call(
         Uri.parse(ServiceManagerProvider.URI),
         ServiceManagerProvider.METHOD_SM, null, new Bundle());
@@ -31,7 +33,7 @@ public class ServiceManager {
       throw new RuntimeException("Service Manager is null [Bundle].");
     }
 
-    IBinder serviceManager = BundleCompat.getBinder(bundle, ServiceManagerProvider.KEY_SM);
+    final IBinder serviceManager = BundleCompat.getBinder(bundle, ServiceManagerProvider.KEY_SM);
 
     if (serviceManager == null) {
       throw new RuntimeException("Service Manager is null [getBinder].");
@@ -40,6 +42,7 @@ public class ServiceManager {
     try {
       serviceManager.linkToDeath(new IBinder.DeathRecipient() {
         @Override public void binderDied() {
+          ServiceManager.sIServiceManager = null;
           ensureIServiceManager(context);
         }
       }, 0);
